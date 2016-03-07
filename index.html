@@ -1,18 +1,25 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<link rel="stylesheet" href="styles.css">
-	<script src="scripts.js"></script>
-	<meta charsets="utf-8">
-	<title>CardEditor</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scripts.js"></script>
+    <meta charset="utf-8">
+    <title>CardEditor</title>
 </head>
 <body>
-	<input type="file" id="imageLoader" name="imageLoader"/>
-
-	<canvas id="appCanvas"></canvas>
-	<script>
-		init();
-		draw();
-	</script>
+    <ul id="mainMenu"> 
+        <li class="sidewaysMenu">
+             <input type="file" id="imageLoader" name="imageLoader"/>
+        </li>
+        <li class="sidewaysMenu">
+            <button/>
+        </li>
+    </ul>
+    
+    <canvas id="appCanvas"></canvas>
+    <script>
+        app.init();
+        app.draw();
+    </script>
 </body>
 </html>
