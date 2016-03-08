@@ -1,18 +1,63 @@
 
 /* global createjs */
 
-$(window).resize(function() {  //Called on window resize
-  
-  $('canvas').attr('height', $(window).height() - 37).attr('width', $(window).width() - 232); //set to height minus top menu, width minus layers menu
-   app.refreshlayers();
-
-});
-
 app = {
     stage: null,
     canvas: null,
-    ctx: null,
     layers: [],
+    callbacks: {},
+    selection: {
+        x: -1, y: -1
+    },
+    renameLayer: 0,
+    undoBuffer: [],
+    redoBuffer: [],
+    
+    addUndo: function () { 
+    this.undoBuffer.push(this.layers.toString()); 
+    this.redoBuffer = []; 
+    }, 
+
+    loadLayers: function (from, to) { 
+        var json, jsonString = from.pop(); 
+        if (jsonString == undefined) return false; 
+        to.push(this.layers.toString()); 
+        json = JSON.parse(jsonString); 
+        for (var i = 0, layer, jsonLayer; ((layer = this.layers[i]) && (jsonLayer = json[i])); i++) { 
+            for (value in jsonLayer) { 
+                if (value != 'filters') { 
+                    layer[value] = jsonLayer[value]; 
+                } else { 
+                    var hadFilters = (layer.filters != null && layer.filters.length > 0); 
+                    layer.filters = []; 
+                    for (var j = 0; j < jsonLayer.filters.names.length; j++) { 
+                        if (jsonLayer.filters.names[j] == null) break; 
+                        layer.filters[j] = new window[jsonLayer.filters.names[j]]; 
+                        for (value2 in jsonLayer.filters.values[0][j]) { 
+                            layer.filters[j][value2] = jsonLayer.filters.values[0][j][value2]; 
+                        } 
+                        hadFilters = true; 
+                    } 
+                    if (hadFilters) { 
+                        if (layer.cacheCanvas) { 
+                            layer.updateCache(); 
+                        } else { 
+                            layer.cache(0, 0, layer.width, layer.height); 
+                        } 
+                    } 
+                } 
+            } 
+        } 
+        this.refreshLayers(); 
+    }, 
+
+    undo: function () { 
+        this.loadLayers(this.undoBuffer, this.redoBuffer); 
+    }, 
+
+    redo: function () { 
+        this.loadLayers(this.redoBuffer, this.undoBuffer); 
+    },
     
     getActiveLayer: function () { 
         var ret; 
@@ -22,7 +67,23 @@ app = {
         if ((ret === undefined) && (this.layers.length > 0)) return this.layers[0]; 
         return ret; 
     }, 
-    
+    getActiveLayerN: function () { 
+        for (var i = 0, layer; layer = this.layers[i]; i++) { 
+            if (layer.active) return i; 
+        } 
+    }, 
+    activateLayer: function (layer) { 
+        this.layers.forEach(function (v) { 
+            v.active = false; 
+        }); 
+        if (layer instanceof Bitmap) { 
+            layer.active = true; 
+        } else  { 
+            if (this.layers[layer] == undefined) return; 
+            this.layers[layer].active = true; 
+        } 
+        this.refreshLayers(); 
+    },
     refreshlayers: function () {
         console.log("refreshlayers");
         if ((this.getActiveLayer() === undefined) && (this.layers.length > 0)) this.layers[0].active = true;
@@ -79,13 +140,13 @@ app = {
             $('ul#layers').prepend('<li id="layer-' + i + '" class="' + (layer.active ? 'active': '') + '"><img src="' + (layer.text != undefined ? '': layer.image.src) + '"/><h1>' + ((layer.name != null) && (layer.name != '') ? layer.name: 'Unnamed layer') + '</h1><span><button class="button-delete">Delete</button><button class="button-hide">' + (layer.visible ? 'Hide': 'Show') + '</button><button class="button-rename">Rename</button></span></li>'); 
         } 
         this.stage.update(); 
-        $('ul#layers').sortable({ 
+        $('ul#layers').sortable({ //Jquery UI. Make layers sortable.  Not necessary for us?
             stop: function () { 
                 app.sortLayers(); 
             } 
         }); 
         
-        //Disable, enable buttons
+        //Disable, enable buttons depending on how many layers exist. Zero disable all buttons?
     }, 
   
     sortLayers: function () { 
