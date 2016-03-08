@@ -1,8 +1,18 @@
 
+$(window).resize(function() {  //Called on window resize
+  
+  $('canvas').attr('height', $(window).height() - 37).attr('width', $(window).width() - 232); //set to height minus top menu, width minus layers menu
+
+  app.draw(); //Redraw  rectangle
+});
+
 app = {
+    stage: null,
     canvas: null,
     ctx: null,
+    
     init: function () {
+        app.stage = new createjs.Stage("canvasElementId");
         var imageLoader = document.getElementById('imageLoader');
          imageLoader.addEventListener('change', app.handleImage, false);
 
@@ -34,3 +44,14 @@ app = {
         reader.readAsDataURL(e.target.files[0]);
     }
 }
+
+function handleTick() {
+    app.stage.update();
+}
+
+$(document).ready(function () {
+   app.canvas = $('canvas')[0];
+   document.onselectstart = function () {return false;};
+   createjs.Ticker.setFPS(30);
+   createjs.Ticker.addEventListener("tick", handleTick);
+});
