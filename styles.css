@@ -28,3 +28,13 @@ ul#layers li span { padding: 0 5px; margin: 3px 0; width: 132px; }
 ul#layers li span button { padding: 3px 5px; margin: 0 3px 0 0; }
 
 button#button-openfile input, button#button-importfile input {opacity:0;}
+
+button#button-move, #button-select, #button-text { background-repeat: no-repeat; background-position: 50% 50%; padding: 10px 20px; }
+button#button-move { background-image: url(move.gif); }
+button#button-text { background-image: url(text.gif); }
+button#button-select { background-image: url(select.png); }
+
+.ui-resizable { position: relative;}
+.ui-resizable-handle { position: absolute;font-size: 0.1px;z-index: 99999; display: block; }
+.ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; }
+.ui-resizable-se { cursor: se-resize; width: 12px; height: 12px; right: 1px; bottom: 1px; }

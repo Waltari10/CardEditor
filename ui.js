@@ -167,7 +167,7 @@ $(document).ready(function () {
 	$('#button-executescript').click(function () {
 		showDialog('#dialog-executescript');
 		$('#dialog-executescript textarea').val('');
-	});
+	});*/
 	
 	$('#button-select').click(function () {
 		app.tool = TOOL_SELECT;
@@ -179,7 +179,7 @@ $(document).ready(function () {
 		app.tool = TOOL_MOVE;
 		$('#mainmenu button').removeClass('active');
 		$(this).addClass('active');
-	});
+	});/*
 	
 	$('#button-text').click(function () {
 		app.tool = TOOL_TEXT;

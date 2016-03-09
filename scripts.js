@@ -20,13 +20,13 @@ app = {
     redoBuffer: [],
     
     addUndo: function () { 
-    this.undoBuffer.push(this.layers.toString()); 
-    this.redoBuffer = []; 
+        this.undoBuffer.push(this.layers.toString()); 
+        this.redoBuffer = []; 
     }, 
 
     loadLayers: function (from, to) { 
         var json, jsonString = from.pop(); 
-        if (jsonString === undefined) return false; 
+        if (jsonString == undefined) return false; 
         to.push(this.layers.toString()); 
         json = JSON.parse(jsonString); 
         for (var i = 0, layer, jsonLayer; ((layer = this.layers[i]) && (jsonLayer = json[i])); i++) { 
@@ -37,7 +37,7 @@ app = {
                     var hadFilters = (layer.filters !== null && layer.filters.length > 0); 
                     layer.filters = []; 
                     for (var j = 0; j < jsonLayer.filters.names.length; j++) { 
-                        if (jsonLayer.filters.names[j] === null) break; 
+                        if (jsonLayer.filters.names[j] == null) break; 
                         layer.filters[j] = new window[jsonLayer.filters.names[j]]; 
                         for (value2 in jsonLayer.filters.values[0][j]) { 
                             layer.filters[j][value2] = jsonLayer.filters.values[0][j][value2]; 
@@ -70,7 +70,7 @@ app = {
         this.layers.forEach(function(v) { 
             if (v.active) ret = v; 
         }); 
-        if ((ret === undefined) && (this.layers.length > 0)) return this.layers[0]; 
+        if ((ret == undefined) && (this.layers.length > 0)) return this.layers[0]; 
         return ret; 
     }, 
     getActiveLayerN: function () { 
@@ -85,13 +85,16 @@ app = {
         if (layer instanceof createjs.Bitmap) { 
             layer.active = true; 
         } else  { 
-            if (this.layers[layer] === undefined) return; 
+            if (this.layers[layer] == undefined) return; 
             this.layers[layer].active = true; 
         } 
         this.refreshlayers(); 
     },
+    
     refreshlayers: function () {
-        if ((this.getActiveLayer() === undefined) && (this.layers.length > 0)) this.layers[0].active = true;
+        console.log("refreshlayers");
+        console.log(app.tool);
+        if ((this.getActiveLayer() == undefined) && (this.layers.length > 0)) this.layers[0].active = true;
         this.stage = new createjs.Stage(this.canvas);        //Set the EaselJS stage
         this.stage.regX = -this.canvas.width / 2;   //set the middle point of the stage
         this.stage.regY = -this.canvas.height / 2;  //--||--
@@ -107,18 +110,21 @@ app = {
         };
         
         $('ul#layers').html(''); 
-        for (var i = 0, layer; layer = this.layers[i]; i++) { 
+        for (var i = 0, layer; layer = this.layers[i]; i++) {
+            console.log("loop thing");
             var self = this; 
             self.stage.addChild(layer); 
             (function(t, n) { 
                 layer.onClick = function (e) { 
-                    if ((self.tool !== TOOL_TEXT) || (!t.text)) return true; 
+                    console.log("onclick");
+                    if ((self.tool != TOOL_TEXT) || (!t.text)) return true; 
                     self.activateLayer(t); 
                     editText = true; 
                 } 
 
                 layer.onPress = function (e1) { 
-                    if (self.tool === TOOL_SELECT) { 
+                    console.log("Layer onpress");
+                    if (self.tool == TOOL_SELECT) { 
                         self.activateLayer(t); 
                     } 
 
@@ -127,10 +133,11 @@ app = {
                         y: t.y - e1.stageY 
                     } 
 
-                    if (self.tool === TOOL_MOVE) self.addUndo(); 
+                    if (self.tool == TOOL_MOVE) self.addUndo(); 
 
-                    e1.onMouseMove = function (e2) { 
-                        if (self.tool === TOOL_MOVE) { 
+                    e1.onMouseMove = function (e2) {  
+                        console.log("onmousemove");
+                        if (self.tool == TOOL_MOVE) {  //Moving the picture around
                             t.x = offset.x + e2.stageX; 
                             t.y = offset.y + e2.stageY; 
                         } 
@@ -160,7 +167,7 @@ app = {
             layersList = $('ul#layers li'); 
 
         for (var i = 0, layer; layer = $(layersList[i]); i++) { 
-            if (layer.attr('id') === undefined) break; 
+            if (layer.attr('id') == undefined) break; 
             tempLayers[i] = this.layers[layer.attr('id').replace('layer-', '') * 1]; 
         } 
 
