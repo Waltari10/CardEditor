@@ -1,11 +1,30 @@
 html, body {
     width:100%;
     height:100%;
-    margin: 1px;
+    margin: 0;
+    padding: 0;
+    background: url(background.gif);
 }
-#mainMenu {
-    width: 100%;
-}
-.sidewaysMenu{
-    float:left;
-}
+
+ul#mainmenu { list-style: none; padding: 2px; margin: 0; float: left; background: rgb(150, 150, 150); font-size: 1.2em;}
+ul#mainmenu li { float: left; margin: 0; padding: 0 2px 0 0; position: relative; }
+
+/* selects ul named mainmenu. Then ul submenu inside an li */
+ul#mainmenu li ul.submenu { list-style: none; position: absolute; left: -2px; top: 34px; background: rgb(150, 150, 150); margin: 0; padding: 0; display: none; float: left; width: 170px; border-radius: 0 0 4px 4px; }
+ul#mainmenu li ul.submenu li {width: 170px;}
+ul#mainmenu li ul.submenu li button {width:163px; text-align: left; margin: 4px; padding-left: 18px;}
+
+
+button { padding: 6px 10px; color: rgb(255, 255, 255); background: rgba(0, 0, 0, 0.3); border: 1px solid rgb(40, 40, 40); border-radius: 4px; }
+button:hover, button.hover { background: rgba(0, 0, 0, 0.2); }
+button:active, button.active { background: rgba(0, 0, 0, 0.4); }
+
+ul#layers {width: 232px; position:fixed; right: 0; top: 37px; background: rgb(150,150,150); padding: 0; margin: 0}
+ul#layers li { margin-top: 5px; padding: 5px; background: rgb(180, 180, 180); border-radius: 4px; }
+ul#layers li.active { background: rgb(160, 160, 160); padding: 3px; border: 2px dotted black; }
+ul#layers li img { width: 42px; height: 42px; float: left; padding: 2px; color: rgb(255, 255, 255); background: rgba(0, 0, 0, 0.3); border: 1px solid rgb(40, 40, 40); border-radius: 4px; }
+ul#layers li h1 { font-size: 16px; padding: 0 5px; margin: 3px 0; width: 132px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+ul#layers li span { padding: 0 5px; margin: 3px 0; width: 132px; }
+ul#layers li span button { padding: 3px 5px; margin: 0 3px 0 0; }
+
+button#button-openfile input, button#button-importfile input {opacity:0;}

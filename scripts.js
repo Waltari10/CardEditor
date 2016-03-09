@@ -1,10 +1,16 @@
 
-/* global createjs */
+/* global createjs, value, value2 */
+
+const  
+    TOOL_MOVE = 0, 
+    TOOL_SELECT = 1, 
+    TOOL_TEXT = 2;
 
 app = {
     stage: null,
     canvas: null,
     layers: [],
+    tool: TOOL_SELECT,
     callbacks: {},
     selection: {
         x: -1, y: -1
@@ -20,18 +26,18 @@ app = {
 
     loadLayers: function (from, to) { 
         var json, jsonString = from.pop(); 
-        if (jsonString == undefined) return false; 
+        if (jsonString === undefined) return false; 
         to.push(this.layers.toString()); 
         json = JSON.parse(jsonString); 
         for (var i = 0, layer, jsonLayer; ((layer = this.layers[i]) && (jsonLayer = json[i])); i++) { 
             for (value in jsonLayer) { 
-                if (value != 'filters') { 
+                if (value !== 'filters') { 
                     layer[value] = jsonLayer[value]; 
                 } else { 
-                    var hadFilters = (layer.filters != null && layer.filters.length > 0); 
+                    var hadFilters = (layer.filters !== null && layer.filters.length > 0); 
                     layer.filters = []; 
                     for (var j = 0; j < jsonLayer.filters.names.length; j++) { 
-                        if (jsonLayer.filters.names[j] == null) break; 
+                        if (jsonLayer.filters.names[j] === null) break; 
                         layer.filters[j] = new window[jsonLayer.filters.names[j]]; 
                         for (value2 in jsonLayer.filters.values[0][j]) { 
                             layer.filters[j][value2] = jsonLayer.filters.values[0][j][value2]; 
@@ -76,31 +82,29 @@ app = {
         this.layers.forEach(function (v) { 
             v.active = false; 
         }); 
-        if (layer instanceof Bitmap) { 
+        if (layer instanceof createjs.Bitmap) { 
             layer.active = true; 
         } else  { 
-            if (this.layers[layer] == undefined) return; 
+            if (this.layers[layer] === undefined) return; 
             this.layers[layer].active = true; 
         } 
-        this.refreshLayers(); 
+        this.refreshlayers(); 
     },
     refreshlayers: function () {
-        console.log("refreshlayers");
         if ((this.getActiveLayer() === undefined) && (this.layers.length > 0)) this.layers[0].active = true;
         this.stage = new createjs.Stage(this.canvas);        //Set the EaselJS stage
         this.stage.regX = -this.canvas.width / 2;   //set the middle point of the stage
         this.stage.regY = -this.canvas.height / 2;  //--||--
         
         app.layers.toString = function () { //Save all layer information into JSON and return as String. Scale, rotation etc...
-            console.log("this: " + this.length);
+            //console.log(this === app.layers);
             var ret = []; 
             
             for (var i = 0, layer; layer = this[i]; i++) {   //How does this for loop work? What is "this"?
-                ret.push('{"x":' + layer.x + ',"y":' + layer.y + ',"scaleX":' + layer.scaleX + ',"scaleY":' + layer.scaleY + ',"skewX":' + layer.skewX + ',"skewY":' + layer.skewY + ',"active":' + layer.active + ',"visible":' + layer.visible + ',"filters":{"names":[' + (layer.filters != null ? layer.filters.toString().replace(/(\[|\])/g, '"'): 'null') + '],"values":[' + JSON.stringify(layer.filters) + ']}}'); 
+                ret.push('{"x":' + layer.x + ',"y":' + layer.y + ',"scaleX":' + layer.scaleX + ',"scaleY":' + layer.scaleY + ',"skewX":' + layer.skewX + ',"skewY":' + layer.skewY + ',"active":' + layer.active + ',"visible":' + layer.visible + ',"filters":{"names":[' + (layer.filters !== null ? layer.filters.toString().replace(/(\[|\])/g, '"'): 'null') + '],"values":[' + JSON.stringify(layer.filters) + ']}}'); 
             } 
             return '[' + ret.join(',') + ']'; 
         };
-        console.log(app.layers.toString());
         
         $('ul#layers').html(''); 
         for (var i = 0, layer; layer = this.layers[i]; i++) { 
@@ -108,13 +112,13 @@ app = {
             self.stage.addChild(layer); 
             (function(t, n) { 
                 layer.onClick = function (e) { 
-                    if ((self.tool != TOOL_TEXT) || (!t.text)) return true; 
+                    if ((self.tool !== TOOL_TEXT) || (!t.text)) return true; 
                     self.activateLayer(t); 
                     editText = true; 
                 } 
 
                 layer.onPress = function (e1) { 
-                    if (self.tool == TOOL_SELECT) { 
+                    if (self.tool === TOOL_SELECT) { 
                         self.activateLayer(t); 
                     } 
 
@@ -123,24 +127,26 @@ app = {
                         y: t.y - e1.stageY 
                     } 
 
-                    if (self.tool == TOOL_MOVE) self.addUndo(); 
+                    if (self.tool === TOOL_MOVE) self.addUndo(); 
 
                     e1.onMouseMove = function (e2) { 
-                        if (self.tool == TOOL_MOVE) { 
+                        if (self.tool === TOOL_MOVE) { 
                             t.x = offset.x + e2.stageX; 
                             t.y = offset.y + e2.stageY; 
                         } 
-                    } 
+                    }; 
                 }; 
             })(layer, i); 
-            layer.width = (layer.text != null ? layer.getMeasuredWidth() * layer.scaleX: layer.image.width * layer.scaleX); 
-            layer.height = (layer.text != null ? layer.getMeasuredLineHeight() * layer.scaleY: layer.image.height * layer.scaleY); 
-            layer.regX = layer.width / 2; 
-            layer.regY = layer.height / 2; 
-            $('ul#layers').prepend('<li id="layer-' + i + '" class="' + (layer.active ? 'active': '') + '"><img src="' + (layer.text != undefined ? '': layer.image.src) + '"/><h1>' + ((layer.name != null) && (layer.name != '') ? layer.name: 'Unnamed layer') + '</h1><span><button class="button-delete">Delete</button><button class="button-hide">' + (layer.visible ? 'Hide': 'Show') + '</button><button class="button-rename">Rename</button></span></li>'); 
+            
+            //layer.width = (layer.text != null ? layer.getMeasuredWidth() * layer.scaleX: layer.image.width * layer.scaleX);  //Not sure what is going on here
+            //layer.height = (layer.text != null ? layer.getMeasuredLineHeight() * layer.scaleY: layer.image.height * layer.scaleY); 
+            
+            layer.regX = layer.image.width / 2; //Determine position of uploaded picture on canvas
+            layer.regY = layer.image.height / 2; 
+            $('ul#layers').prepend('<li id="layer-' + i + '" class="' + (layer.active ? 'active': '') + '"><img src="' + (layer.text !== undefined ? '': layer.image.src) + '"/><h1>' + ((layer.name !== null) && (layer.name !== '') ? layer.name: 'Unnamed layer') + '</h1><span><button class="button-delete">Delete</button><button class="button-hide">' + (layer.visible ? 'Hide': 'Show') + '</button><button class="button-rename">Rename</button></span></li>'); 
         } 
         this.stage.update(); 
-        $('ul#layers').sortable({ //Jquery UI. Make layers sortable.  Not necessary for us?
+        $('ul#layers').sortable({ //Jquery UI. Make layers sortable.
             stop: function () { 
                 app.sortLayers(); 
             } 
@@ -154,13 +160,13 @@ app = {
             layersList = $('ul#layers li'); 
 
         for (var i = 0, layer; layer = $(layersList[i]); i++) { 
-            if (layer.attr('id') == undefined) break; 
+            if (layer.attr('id') === undefined) break; 
             tempLayers[i] = this.layers[layer.attr('id').replace('layer-', '') * 1]; 
         } 
 
         tempLayers.reverse(); 
         this.layers = tempLayers; 
-        this.refreshLayers(); 
+        this.refreshlayers(); 
     }
 };
 
